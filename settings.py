@@ -4,7 +4,7 @@
 BACKEND = 'SQLITE'
 
 # Required for ES backend
-ES_HOST = 'search-twittertest-spqmtzksib5qmoczzzt2yadbua.us-east-1.es.amazonaws.com'
+ES_HOST = ''
 AWS_REGION = 'us-east-1'
 
 
