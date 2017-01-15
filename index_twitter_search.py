@@ -1,16 +1,15 @@
 import tweepy
-import config
+from backends import config, elastic_search
 from elasticsearch import helpers
-from esconn import esconn
 from tweet_model import map_tweet_for_es
 
 # unicode mgmt
-import sys
-reload(sys)
-sys.setdefaultencoding('utf8')
+# import sys
+# reload(sys)
+# sys.setdefaultencoding('utf8')
 
 # go get elasticsearch connection
-es = esconn()
+es = elastic_search.esconn()
 
 # auth & api handlers
 auth = tweepy.OAuthHandler(config.CONSUMER_KEY, config.CONSUMER_SECRET)
@@ -28,9 +27,10 @@ def tweet_text():
         if (not tweet.retweeted) and ('RT @' not in tweet.text):
             yield map_tweet_for_es(tweet, topics)
 
+
 # bulk insert into twitter index
 helpers.bulk(es, tweet_text(), index='twitter', doc_type='tweets')
 
 # view the message field in the twitter index
 messages = es.search(index="twitter", size=1000, _source=['message'])
-print messages
+print(messages)

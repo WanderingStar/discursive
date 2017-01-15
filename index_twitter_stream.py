@@ -1,16 +1,16 @@
 import json
 import tweepy
-import config
+from backends import config
 import os
-from esconn import esconn
-import s3conn
+from backends.elastic_search import esconn
+from backends import s3conn
 from datetime import datetime as dt
 from tweet_model import map_tweet_for_es
 
 # unicode mgmt
 import sys
-reload(sys)
-sys.setdefaultencoding('utf8')
+# reload(sys)
+# sys.setdefaultencoding('utf8')
 
 # Twitter auth and api call setup
 auth = tweepy.OAuthHandler(config.CONSUMER_KEY, config.CONSUMER_SECRET)
@@ -56,7 +56,7 @@ class StreamListener(tweepy.StreamListener):
             self.tweet_list.append(tweet)
             dump_to_elastic(tweet)
 
-            print 'Tweet Count# ' + str(self.counter) + ' ' + json.dumps(fix_date_for_tweet(tweet))
+            print('Tweet Count# {} {}'.format(self.counter, json.dumps(fix_date_for_tweet(tweet))))
         else:
             # if limit reached write saved tweets to s3
             dump_to_s3(self.tweet_list)
@@ -130,7 +130,7 @@ def dump_to_file(data, filename):
             fw.write(tweet_list)
         return path
     except (IOError, OSError) as ex:
-        print str(ex)
+        print(str(ex))
 
 
 def fix_dates_for_dump(data):

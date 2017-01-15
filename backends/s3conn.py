@@ -1,6 +1,6 @@
 import boto3
 from botocore.client import ClientError
-import config
+from backends import config
 
 
 def get_s3_bucket(bucket_name):
@@ -27,4 +27,4 @@ def write_file_to_s3(data, key, bucket_name="discursive"):
     if bucket is not False:
         bucket.put_object(Key=key, Body=data)
     else:
-        print bucket_name + " bucket could not be found"
+        print('{} bucket could not be found'.format(bucket_name))
