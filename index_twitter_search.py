@@ -3,6 +3,7 @@ from elasticsearch import helpers
 from tweet_model import map_tweet_for_es
 from backends import get_backend
 import credentials
+import settings
 
 # unicode mgmt
 # import sys
@@ -11,7 +12,7 @@ import credentials
 
 # go get elasticsearch connection
 backend = get_backend.Backend()
-es = backend.setup()
+datastore = backend.setup()
 
 # auth & api handlers
 auth = tweepy.OAuthHandler(credentials.CONSUMER_KEY, credentials.CONSUMER_SECRET)
@@ -30,9 +31,26 @@ def tweet_text():
             yield map_tweet_for_es(tweet, topics)
 
 
-# bulk insert into twitter index
-helpers.bulk(es, tweet_text(), index='twitter', doc_type='tweets')
+# TODO clean up
+if backend.backend == 'ES':
+    # bulk insert into twitter index
+    helpers.bulk(datastore, tweet_text(), index='twitter', doc_type='tweets')
+    messages = datastore.search(index="twitter", size=1000, _source=['message'])
+    print(messages)
+
+elif backend.backend == 'SQLITE':
+    for tweet in search:
+        if (not tweet.retweeted) and ('RT @' not in tweet.text):
+            tweet_dict = map_tweet_for_es(tweet, topics)
+            tweet_dict['topics'] = str(tweet_dict['topics'])
+
+            # TODO create save function
+            table = datastore[settings.TABLE_NAME]
+            table.insert(tweet_dict)
+
+
+
+
+
 
 # view the message field in the twitter index
-messages = es.search(index="twitter", size=1000, _source=['message'])
-print(messages)

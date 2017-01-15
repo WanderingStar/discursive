@@ -1,15 +1,16 @@
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
-import credentials, settings
+import credentials
+import settings
 
 
 def esconn():
     '''
     Create elastic search connection
     '''
-    host = settings.es_host
+    host = settings.ES_HOST
     awsauth = AWS4Auth(credentials.access_id, credentials.access_secret,
-                       settings.aws_region, 'es')
+                       settings.AWS_REGION, 'es')
 
     es = Elasticsearch(
         hosts=[{'host': host, 'port': 443}],
