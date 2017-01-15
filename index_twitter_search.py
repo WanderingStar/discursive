@@ -1,7 +1,8 @@
 import tweepy
-from backends import config, elastic_search
 from elasticsearch import helpers
 from tweet_model import map_tweet_for_es
+from backends import get_backend
+import credentials
 
 # unicode mgmt
 # import sys
@@ -9,11 +10,12 @@ from tweet_model import map_tweet_for_es
 # sys.setdefaultencoding('utf8')
 
 # go get elasticsearch connection
-es = elastic_search.esconn()
+backend = get_backend.Backend()
+es = backend.setup()
 
 # auth & api handlers
-auth = tweepy.OAuthHandler(config.CONSUMER_KEY, config.CONSUMER_SECRET)
-auth.set_access_token(config.ACCESS_TOKEN, config.ACCESS_TOKEN_SECRET)
+auth = tweepy.OAuthHandler(credentials.CONSUMER_KEY, credentials.CONSUMER_SECRET)
+auth.set_access_token(credentials.ACCESS_TOKEN, credentials.ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
 # load topics & build a search

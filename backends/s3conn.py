@@ -1,12 +1,12 @@
 import boto3
 from botocore.client import ClientError
-from backends import config
+import settings
 
 
 def get_s3_bucket(bucket_name):
     s3 = boto3.resource('s3',
-                        aws_access_key_id=config.access_id,
-                        aws_secret_access_key=config.access_secret
+                        aws_access_key_id=settings.access_id,
+                        aws_secret_access_key=settings.access_secret
                         )
     try:
         bucket = s3.create_bucket(Bucket=bucket_name,

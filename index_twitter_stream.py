@@ -1,43 +1,23 @@
 import json
 import tweepy
-from backends import config
 import os
-from backends.elastic_search import esconn
-from backends import s3conn
+from backends import get_backend, s3conn
 from datetime import datetime as dt
 from tweet_model import map_tweet_for_es
+import credentials
 
-# unicode mgmt
-import sys
-# reload(sys)
-# sys.setdefaultencoding('utf8')
 
 # Twitter auth and api call setup
-auth = tweepy.OAuthHandler(config.CONSUMER_KEY, config.CONSUMER_SECRET)
-auth.set_access_token(config.ACCESS_TOKEN, config.ACCESS_TOKEN_SECRET)
+auth = tweepy.OAuthHandler(credentials.CONSUMER_KEY, credentials.CONSUMER_SECRET)
+auth.set_access_token(credentials.ACCESS_TOKEN, credentials.ACCESS_TOKEN_SECRET)
 api = tweepy.API(auth)
 
 # Get elasticsearch connection
-es = esconn()
+backend = get_backend.Backend()
+es = backend.setup()
 
-if len(sys.argv) >= 2:
-    sys.exit('ERROR: Received 2 or more arguments. Expected 1: Topic file name')
-
-elif len(sys.argv) == 2:
-    try:
-        with open(sys.argv[1]) as f:
-            topics = f.readlines()
-    except Exception:
-        sys.exit('ERROR: Expected topic file %s not found' % sys.argv[1])
-else:
-    try:
-        with open('topics.txt') as f:
-            topics = f.readlines()
-    except:
-        sys.exit('ERROR: Default topics.txt not found. No alternate topic file  was provided')
-
-
-TOPICS = [topic.replace('\n', '').strip() for topic in topics]
+# Will be replaced by settings
+TOPICS = 'oathkeeper'
 
 
 class StreamListener(tweepy.StreamListener):
@@ -139,6 +119,7 @@ def fix_dates_for_dump(data):
         tweet["user_created"] = str(tweet["user_created"])
         tweet["created"] = str(tweet["created"])
     return data
+
 
 def fix_date_for_tweet(tweet):
     tweet["user_created"] = str(tweet["user_created"])
