@@ -4,7 +4,8 @@ from tweet_model import map_tweet_for_es
 from backends import get_backend
 import credentials
 import settings
-
+import json
+from datetime import datetime
 # unicode mgmt
 # import sys
 # reload(sys)
@@ -31,7 +32,8 @@ def tweet_text():
             yield map_tweet_for_es(tweet, topics)
 
 
-# TODO clean up
+# TODO move all save logic to separate process
+
 if backend.backend == 'ES':
     # bulk insert into twitter index
     helpers.bulk(datastore, tweet_text(), index='twitter', doc_type='tweets')
@@ -48,9 +50,14 @@ elif backend.backend == 'SQLITE':
             table = datastore[settings.TABLE_NAME]
             table.insert(tweet_dict)
 
+elif backend.backend == 'FILE':
+    with open(datastore, 'w') as f:
+        for tweet in search:
+            if (not tweet.retweeted) and ('RT @' not in tweet.text):
+                tweet_dict = map_tweet_for_es(tweet, topics)
+                tweet_dict['topics'] = str(tweet_dict['topics'])
+                tweet_dict['created'] = tweet_dict['created'].strftime("%Y-%d-%m %H:%M:%S")
+                tweet_dict['user_created'] = tweet_dict['user_created'].strftime("%Y-%d-%m %H:%M:%S")
 
-
-
-
-
-# view the message field in the twitter index
+                json_out = json.dumps(tweet_dict)
+                f.write(json_out + '\n')

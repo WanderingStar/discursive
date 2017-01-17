@@ -6,5 +6,5 @@ CONSUMER_SECRET = ""
 
 # AWS Config
 # or your settings here
-access_secret = ''
-access_id = ''
+access_secret = ""
+access_id = ""

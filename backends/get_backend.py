@@ -21,3 +21,12 @@ class Backend():
             db_path = os.path.join(settings.DATA_DIR, settings.DATABASE_NAME)
             datastore = dataset.connect("sqlite:///{}.sqlite".format(db_path))
             return datastore
+
+        elif self.backend == 'FILE':
+            if settings.FORMAT == 'JSON':
+                if settings.FILE_NAME.split('.')[-1].lower() == settings.FORMAT.lower():
+                    fname = settings.FILE_NAME.lower()
+                else:
+                    fname = '{}.json'.format(settings.FILE_NAME)
+                filestore = os.path.join(settings.DATA_DIR, fname)
+            return filestore
